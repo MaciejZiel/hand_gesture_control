@@ -1,22 +1,22 @@
 # hand_gesture_control (MVP)
 
-Minimalny projekt do sterowania gestami dloni z kamerki (Windows + Linux).
+Minimal hand gesture control project using a webcam (Windows + Linux).
 
-## Co jest zrobione
+## What's implemented
 
-- Live podglad z kamerki + overlay landmarkow i panel statusu.
-- Rozpoznawanie wielu gestow jednej dloni + gesty dwoch dloni (LEFT/RIGHT/BOTH/DUAL).
-- Stabilizacja rozpoznawania (okno, czas, histereza) + cooldown.
-- Mapowanie gest -> akcja klawiatury, makra (sekwencje, text, delay).
-- Profile akcji i szybkie przelaczanie (UI/klawisze/CLI).
-- Kalibracja progow kciuk/pinch zapisywana do `config.json`.
-- Logowanie zdarzen do pliku.
-- Tryb headless (bez okna) + autostart na Linux.
-- Tryb pauzy i przeladowanie configu w locie.
+- Live webcam preview with landmark overlay and status panel.
+- Recognition of multiple single-hand gestures plus two-hand gestures (LEFT/RIGHT/BOTH/DUAL).
+- Gesture stabilization (window, time, hysteresis) plus cooldown.
+- Gesture-to-key mapping, macros (sequences, text, delay).
+- Action profiles and quick switching (UI/keys/CLI).
+- Thumb and pinch threshold calibration saved to `config.json`.
+- Event logging to a file.
+- Headless mode (no window) plus Linux autostart.
+- Pause mode and hot config reload.
 
-## Instalacja
+## Installation
 
-```
+```bash
 python -m venv .venv
 # Windows
 .venv\Scripts\activate
@@ -26,62 +26,62 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Srodowisko developerskie (testy):
+Development environment (tests):
 
-```
+```bash
 pip install -r requirements-dev.txt
 ```
 
 ## Quick Start
 
-1. Zainstaluj zaleznosci (`pip install -r requirements.txt`)
-2. Pobierz model (jeśli pracujesz na Python 3.12/3.13)
-3. Uruchom:
+1. Install dependencies (`pip install -r requirements.txt`)
+2. Download the model (if you are using Python 3.12/3.13)
+3. Run:
 
-```
+```bash
 python -m hand_gesture_control --dry-run --backend tasks
 ```
 
-## Uruchomienie
+## Run
 
-```
+```bash
 python -m hand_gesture_control
 ```
 
-Tryb testowy (bez naciskania klawiszy):
+Test mode (without sending key presses):
 
-```
+```bash
 python -m hand_gesture_control --dry-run
 ```
 
-Tryb bez okna (dziala w tle):
+Headless mode (runs in the background):
 
-```
+```bash
 python -m hand_gesture_control --headless
 ```
 
-Start w pauzie:
+Start paused:
 
-```
+```bash
 python -m hand_gesture_control --paused
 ```
 
-Zamknij okno: `q` albo `Esc`.
+Close the window with `q` or `Esc`.
 
 ## MediaPipe backend
 
-Domyslnie `backend=auto`:
+By default, `backend=auto`:
 
-- Jesli `mediapipe` ma `solutions`, uzywa starego API (najprostsze).
-- Jesli nie ma `solutions`, uzywa `tasks` i wymaga modelu `hand_landmarker.task`.
+- If `mediapipe` provides `solutions`, the app uses the legacy API (simplest setup).
+- If `solutions` is not available, it uses `tasks` and requires a `hand_landmarker.task` model.
 
-Na Python 3.12/3.13 mediapipe zwykle nie zawiera `solutions`, wiec potrzebujesz modelu.
-Ustaw `task_model_path` w `config.json` (domyslnie `models/hand_landmarker.task`) albo
-podaj `--model`.
+On Python 3.12/3.13, `mediapipe` usually does not include `solutions`, so you need the model.
+Set `task_model_path` in `config.json` (default: `models/hand_landmarker.task`) or pass
+`--model`.
 
-Przyklad pobrania modelu (Linux/macOS):
+Example model download (Linux/macOS):
 
-```
+```bash
 mkdir -p models
 python - <<'PY'
 import pathlib
@@ -95,60 +95,60 @@ print("Saved", path)
 PY
 ```
 
-## Konfiguracja
+## Configuration
 
-Plik `config.json` w katalogu projektu.
+Use the `config.json` file in the project directory.
 
-Najwazniejsze pola:
+Most important fields:
 
-- `gesture_to_action`: mapowanie gest -> klawisz
-- `gesture_window_size` i `gesture_min_votes`: stabilizacja gestu
-- `gesture_min_stable_time`, `gesture_min_frames`: czas i liczba klatek do uznania gestu
-- `gesture_switch_multiplier`: dodatkowy czas przy zmianie gestu
-- `gesture_unknown_timeout`: ile trzymac ostatni gest, gdy dlon znika
-- `thumb_extended_ratio`, `pinch_ratio`, `thumb_up_down_threshold`: progi klasyfikacji
-- `cooldown_seconds`: opoznienie miedzy wyzwoleniami
+- `gesture_to_action`: gesture-to-key mapping
+- `gesture_window_size` and `gesture_min_votes`: gesture stabilization
+- `gesture_min_stable_time`, `gesture_min_frames`: time and frame count required to accept a gesture
+- `gesture_switch_multiplier`: extra hold time when switching gestures
+- `gesture_unknown_timeout`: how long to keep the last gesture when the hand disappears
+- `thumb_extended_ratio`, `pinch_ratio`, `thumb_up_down_threshold`: classification thresholds
+- `cooldown_seconds`: delay between triggers
 - `backend`: `auto` / `solutions` / `tasks`
-- `task_model_path`: sciezka do `hand_landmarker.task` (dla `tasks`)
-- `camera_width` / `camera_height`: wymuszenie rozdzielczosci kamery
-- `max_num_hands`: 1 lub 2 (domyslnie 2)
-- `headless`: `true`/`false` (uruchomienie bez okna)
-- `start_paused`: start w trybie pauzy (nie wysyla akcji)
-- `fullscreen`: `true`/`false` (pelny ekran)
-- `windowed_fullscreen`: `true`/`false` (okno na caly ekran z widocznymi przyciskami)
-- `windowed_margin`: ile pikseli odjac z wysokosci (na pasek okna)
-- `display_width` / `display_height`: rozmiar wyswietlania (np. 2880x1800)
-- `overlay_scale`: `auto` albo liczba (np. `1.0`, `1.2`) - skala UI
-- `overlay_alpha`, `overlay_padding`, `overlay_line_gap`: wyglad panelu UI
-- `landmark_scale`: skala ikon (punkty/linie dloni)
-- `controls_enabled`: pokazuje przyciski na ekranie
+- `task_model_path`: path to `hand_landmarker.task` (for `tasks`)
+- `camera_width` / `camera_height`: force camera resolution
+- `max_num_hands`: 1 or 2 (default: 2)
+- `headless`: `true`/`false` (run without a window)
+- `start_paused`: start in paused mode (does not send actions)
+- `fullscreen`: `true`/`false` (fullscreen mode)
+- `windowed_fullscreen`: `true`/`false` (full-screen-sized window with visible controls)
+- `windowed_margin`: how many pixels to subtract from height (for the window bar)
+- `display_width` / `display_height`: display size (for example `2880x1800`)
+- `overlay_scale`: `auto` or a number (for example `1.0`, `1.2`) for UI scale
+- `overlay_alpha`, `overlay_padding`, `overlay_line_gap`: status panel appearance
+- `landmark_scale`: hand landmark icon scale (points/lines)
+- `controls_enabled`: show on-screen buttons
 - `controls_position`: `right` / `top-right` / `top-left`
-- `controls_scale`, `controls_alpha`, `controls_margin`, `controls_gap`: wyglad przyciskow
-- `active_profile`: aktywny profil (np. `default`)
-- `profiles`: zestawy mapowan gestow na akcje
-- `log_enabled`: zapis zdarzen do pliku
+- `controls_scale`, `controls_alpha`, `controls_margin`, `controls_gap`: on-screen button appearance
+- `active_profile`: active profile (for example `default`)
+- `profiles`: sets of gesture-to-action mappings
+- `log_enabled`: write events to a file
 - `log_mode`: `actions` / `active` / `all`
-- `log_path`: sciezka do logu (np. `logs/gesture_events.log`)
+- `log_path`: log file path (for example `logs/gesture_events.log`)
 
-Przyklady akcji:
+Action examples:
 
 - `SPACE`, `LEFT`, `RIGHT`, `UP`, `DOWN`
 - `M`
 - `CTRL+SHIFT+P`
-- `VOLUME_UP`, `VOLUME_DOWN` (dziala jesli system wspiera media keys)
+- `VOLUME_UP`, `VOLUME_DOWN` (works if the system supports media keys)
 
-Makra (sekwencje):
+Macros (sequences):
 
 - `CTRL+L;TEXT:hello;ENTER`
 - `DELAY:0.3;SPACE`
 
-Mozesz tez uzyc listy w JSON:
+You can also use a JSON list:
 
-```
+```json
 "OPEN_PALM": ["CTRL+L", "TEXT:hello", "ENTER"]
 ```
 
-## Gesty
+## Gestures
 
 - `OPEN_PALM`
 - `FOUR_FINGERS`
@@ -156,25 +156,25 @@ Mozesz tez uzyc listy w JSON:
 - `INDEX_UP`
 - `TWO_FINGERS`
 - `THREE_FINGERS`
-- `ROCK` (wskazujacy + maly)
+- `ROCK` (index + pinky)
 - `OK_SIGN`
 - `PINCH`
-- `THUMB_UP` / `THUMB_DOWN` (lub `THUMB` jako fallback)
+- `THUMB_UP` / `THUMB_DOWN` (or `THUMB` as a fallback)
 
-Gesty dwoch dloni:
+Two-hand gestures:
 
-- gdy obie dlonie maja ten sam stabilny gest, aktywny gest ma nazwe `BOTH_<GESTURE>`
-  (np. `BOTH_OPEN_PALM`, `BOTH_FIST`).
-- gdy obie dlonie maja rozne gesty: `DUAL_<LEFT>_<RIGHT>` (np. `DUAL_FIST_OPEN_PALM`)
-- gdy tylko jedna dlon jest stabilna przy dwoch widocznych: `LEFT_<GESTURE>` albo `RIGHT_<GESTURE>`
+- When both hands have the same stable gesture, the active gesture is named `BOTH_<GESTURE>`
+  (for example `BOTH_OPEN_PALM`, `BOTH_FIST`).
+- When both hands have different gestures: `DUAL_<LEFT>_<RIGHT>` (for example `DUAL_FIST_OPEN_PALM`)
+- When only one hand is stable while two hands are visible: `LEFT_<GESTURE>` or `RIGHT_<GESTURE>`
 
-## Profile
+## Profiles
 
-Mozesz miec wiele profilow (np. Spotify/YouTube/Prezentacja).
+You can define multiple profiles (for example Spotify/YouTube/Presentation).
 
-Przyklad w `config.json`:
+Example in `config.json`:
 
-```
+```json
 "active_profile": "default",
 "profiles": {
   "default": {
@@ -186,72 +186,73 @@ Przyklad w `config.json`:
 }
 ```
 
-Przelaczanie profili:
+Profile switching:
 
-- klawisz `p` (cykl)
-- klawisze `1-9` (wybor profilu po kolejnosci)
-- przycisk `PROF` na ekranie (jesli `controls_enabled=true`)
-- `--profile nazwa` przy uruchomieniu
+- `p` key (cycle)
+- `1-9` keys (select profile by order)
+- `PROF` on-screen button (if `controls_enabled=true`)
+- `--profile <name>` on startup
 
-Szybkie sterowanie:
+Quick controls:
 
-- `s` — pauza/wznowienie akcji
-- `r` — przeladowanie `config.json` w locie
+- `s` - pause/resume actions
+- `r` - hot reload `config.json`
 
-Przyciski w UI:
+UI buttons:
 
-- `PAUSE` / `RUN` — pauza/wznowienie
-- `CFG` — przeladowanie konfiguracji
+- `PAUSE` / `RUN` - pause/resume
+- `CFG` - reload configuration
 
-## Logowanie
+## Logging
 
-Wlacz w `config.json`:
+Enable in `config.json`:
 
-```
+```json
 "log_enabled": true,
 "log_mode": "actions",
 "log_path": "logs/gesture_events.log"
 ```
 
-## Kalibracja
+## Calibration
 
-Szybka kalibracja progow (kciuk i pinch) i zapis do `config.json`:
+Quick threshold calibration (thumb and pinch) with values saved to `config.json`:
 
-```
+```bash
 python -m hand_gesture_control --calibrate --backend tasks
 ```
 
-W trakcie:
-- pokaz otwarta dlon z kciukiem
-- pokaz pinch (kciuk + wskazujacy)
+During calibration:
 
-Przerwanie: `q` lub `Esc`.
+- show an open hand with the thumb visible
+- show a pinch gesture (thumb + index finger)
 
-## Testy
+Abort with `q` or `Esc`.
 
-```
+## Tests
+
+```bash
 pytest
 ```
 
-## Lint/format (opcjonalnie)
+## Lint/format (optional)
 
-```
+```bash
 ruff .
 black .
 ```
 
 ## Autostart (Linux)
 
-Skrypty w `scripts/`:
+Scripts in `scripts/`:
 
-```
+```bash
 chmod +x scripts/install_autostart_linux.sh
 ./scripts/install_autostart_linux.sh
 ```
 
-Usuniecie:
+Remove:
 
-```
+```bash
 chmod +x scripts/remove_autostart_linux.sh
 ./scripts/remove_autostart_linux.sh
 ```
