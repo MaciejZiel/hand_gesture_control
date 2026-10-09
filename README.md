@@ -1,74 +1,125 @@
-# hand_gesture_control (MVP)
+# hand_gesture_control
 
-Minimal hand gesture control project using a webcam (Windows + Linux).
+Control your desktop with hand gestures from a regular webcam: MediaPipe finds the hand,
+a rule-based classifier names the gesture, and the app presses the keys (or runs the macro)
+you mapped to it. Works on Linux and Windows.
 
-## What's implemented
+[![CI](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml/badge.svg)](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
+![MediaPipe + OpenCV](https://img.shields.io/badge/MediaPipe-OpenCV-0F9D58)
 
-- Live webcam preview with landmark overlay and status panel.
-- Recognition of multiple single-hand gestures plus two-hand gestures (LEFT/RIGHT/BOTH/DUAL).
-- Gesture stabilization (window, time, hysteresis) plus cooldown.
-- Gesture-to-key mapping, macros (sequences, text, delay).
-- Action profiles and quick switching (UI/keys/CLI).
-- Thumb and pinch threshold calibration saved to `config.json`.
-- Event logging to a file.
-- Headless mode (no window) plus Linux autostart.
-- Pause mode and hot config reload.
+<!-- TODO: add a short demo GIF (docs/demo.gif) recorded with the webcam preview,
+     showing a gesture and the triggered action in the status panel. -->
 
-## Installation
+## What it does
+
+- Tracks up to two hands in the webcam feed and recognises 11 single-hand gestures
+  (open palm, fist, pinch, OK sign, thumb up/down, 1-4 fingers, "rock") from 21 hand landmarks.
+- Combines both hands into `BOTH_*`, `DUAL_<LEFT>_<RIGHT>`, `LEFT_*` and `RIGHT_*` gestures,
+  so two-handed combinations can have their own bindings.
+- Maps gestures to key presses, shortcuts (`CTRL+SHIFT+P`), media keys or macros
+  (`CTRL+L;TEXT:hello;ENTER`), grouped into switchable profiles (e.g. Spotify, presentation).
+- Debounces noisy per-frame predictions (voting window + minimum hold time + hysteresis
+  on switching + cooldown) so a gesture fires once, not 30 times per second.
+- Ships with a calibration mode, live overlay with on-screen buttons, `--dry-run`,
+  headless mode, hot config reload, event logging and a Linux autostart script.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    CAM[Webcam<br/>OpenCV] --> TR[HandTracker<br/>MediaPipe solutions / tasks]
+    TR -->|21 landmarks per hand| CL[GestureClassifier<br/>finger-state rules]
+    CL -->|raw label per frame| SM[GestureSmoother<br/>one per hand]
+    SM -->|stable gesture| CMB[Two-hand combiner<br/>BOTH / DUAL / LEFT / RIGHT]
+    CMB --> PR[Active profile<br/>config.json]
+    PR -->|action + cooldown| EX[ActionExecutor<br/>pynput keys & macros]
+    CMB --> UI[OpenCV overlay<br/>status panel + buttons]
+```
+
+`main.py` owns the capture loop and UI; the classifier and smoother are pure Python with no
+camera or MediaPipe dependency, which is what the tests exercise.
+
+## Tech stack
+
+Python 3.10+, MediaPipe (Hands legacy API or Tasks `HandLandmarker`), OpenCV, pynput,
+pytest, ruff, black, GitHub Actions.
+
+## Quick start
+
+Requires a webcam.
 
 ```bash
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Linux/macOS
-source .venv/bin/activate
-
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-```
 
-Development environment (tests):
-
-```bash
-pip install -r requirements-dev.txt
-```
-
-## Quick Start
-
-1. Install dependencies (`pip install -r requirements.txt`)
-2. Download the model (if you are using Python 3.12/3.13)
-3. Run:
-
-```bash
+# Python 3.12+: mediapipe has no legacy `solutions` API, download the Tasks model first
+# (see "MediaPipe backend" below), then:
 python -m hand_gesture_control --dry-run --backend tasks
 ```
 
-## Run
-
-```bash
-python -m hand_gesture_control
-```
-
-Test mode (without sending key presses):
-
-```bash
-python -m hand_gesture_control --dry-run
-```
-
-Headless mode (runs in the background):
-
-```bash
-python -m hand_gesture_control --headless
-```
-
-Start paused:
-
-```bash
-python -m hand_gesture_control --paused
-```
-
+`--dry-run` prints the actions instead of pressing keys, which is the safest way to try it.
 Close the window with `q` or `Esc`.
 
-## MediaPipe backend
+Other modes:
+
+```bash
+python -m hand_gesture_control                 # live, sends key presses
+python -m hand_gesture_control --headless      # no preview window
+python -m hand_gesture_control --paused        # start with actions paused
+python -m hand_gesture_control --profile spotify
+python -m hand_gesture_control --calibrate --backend tasks   # tune thumb/pinch thresholds
+```
+
+Keys in the preview window: `s` pause/resume, `r` reload `config.json`, `p` next profile,
+`1`-`9` select profile.
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest          # 12 tests
+ruff check . && black --check .
+```
+
+The tests feed synthetic landmark sets to the classifier (one per gesture) and drive the
+smoother with explicit timestamps, so they run without a camera. CI runs lint and tests on
+Python 3.10 and 3.12.
+
+## Key technical decisions
+
+- **Rule-based classifier instead of a trained model.** Each finger is "extended" when
+  tip, PIP and MCP joints are ordered along the y axis; the thumb and pinch use distances
+  normalised by palm size (wrist to middle-finger MCP), so they do not depend on how far the
+  hand is from the camera. No dataset or training is needed and every decision is explainable;
+  the cost is sensitivity to hand rotation, which calibration only partly compensates for.
+- **Temporal smoothing as a separate, testable component.** Per-frame labels flicker. The
+  smoother requires a majority in a sliding window, a minimum number of frames *and* a minimum
+  hold time, holds the gesture longer when switching to a different one (hysteresis), and
+  keeps the last gesture briefly when the hand disappears. Timestamps are injectable, so the
+  logic is unit-tested deterministically.
+- **Two MediaPipe backends behind one tracker interface.** Newer `mediapipe` wheels for Python
+  3.12+ drop the legacy `solutions` API, so `HandTracker` falls back to the Tasks API (which needs
+  a `.task` model file) and normalises both outputs to the same landmark objects.
+- **All behaviour in `config.json`.** Bindings, profiles, thresholds and UI settings are data,
+  reloadable at runtime with `r`, so changing what a gesture does needs no code change.
+
+## Limitations / next steps
+
+- Gestures are judged from 2D image coordinates assuming an upright hand; strongly rotated or
+  sideways hands are misclassified.
+- Key injection goes through pynput, which does not work under Wayland without XWayland and
+  may need accessibility permissions on macOS (macOS is untested).
+- Only the classifier and smoother are covered by tests; the capture loop in `main.py` is large
+  and would benefit from being split so action resolution and the two-hand combiner can be tested.
+- Possible next steps: system tray control, a learned classifier (e.g. k-NN on landmarks) for
+  custom gestures, profile import/export.
+
+## Reference
+
+### MediaPipe backend
 
 By default, `backend=auto`:
 
@@ -95,7 +146,7 @@ print("Saved", path)
 PY
 ```
 
-## Configuration
+### Configuration
 
 Use the `config.json` file in the project directory.
 
@@ -148,7 +199,7 @@ You can also use a JSON list:
 "OPEN_PALM": ["CTRL+L", "TEXT:hello", "ENTER"]
 ```
 
-## Gestures
+### Gestures
 
 - `OPEN_PALM`
 - `FOUR_FINGERS`
@@ -168,7 +219,7 @@ Two-hand gestures:
 - When both hands have different gestures: `DUAL_<LEFT>_<RIGHT>` (for example `DUAL_FIST_OPEN_PALM`)
 - When only one hand is stable while two hands are visible: `LEFT_<GESTURE>` or `RIGHT_<GESTURE>`
 
-## Profiles
+### Profiles
 
 You can define multiple profiles (for example Spotify/YouTube/Presentation).
 
@@ -203,7 +254,7 @@ UI buttons:
 - `PAUSE` / `RUN` - pause/resume
 - `CFG` - reload configuration
 
-## Logging
+### Logging
 
 Enable in `config.json`:
 
@@ -213,46 +264,13 @@ Enable in `config.json`:
 "log_path": "logs/gesture_events.log"
 ```
 
-## Calibration
-
-Quick threshold calibration (thumb and pinch) with values saved to `config.json`:
+### Autostart (Linux)
 
 ```bash
-python -m hand_gesture_control --calibrate --backend tasks
+bash scripts/install_autostart_linux.sh   # adds ~/.config/autostart/hand_gesture_control.desktop
+bash scripts/remove_autostart_linux.sh
 ```
 
-During calibration:
+## License
 
-- show an open hand with the thumb visible
-- show a pinch gesture (thumb + index finger)
-
-Abort with `q` or `Esc`.
-
-## Tests
-
-```bash
-pytest
-```
-
-## Lint/format (optional)
-
-```bash
-ruff .
-black .
-```
-
-## Autostart (Linux)
-
-Scripts in `scripts/`:
-
-```bash
-chmod +x scripts/install_autostart_linux.sh
-./scripts/install_autostart_linux.sh
-```
-
-Remove:
-
-```bash
-chmod +x scripts/remove_autostart_linux.sh
-./scripts/remove_autostart_linux.sh
-```
+MIT, see [LICENSE](LICENSE).

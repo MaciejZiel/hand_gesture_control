@@ -1,5 +1,5 @@
-from collections import Counter, deque
 import time
+from collections import Counter, deque
 from typing import Deque, Optional
 
 
@@ -34,7 +34,10 @@ class GestureSmoother:
 
         self.window.append(gesture)
         if gesture == "UNKNOWN":
-            if self._last_seen_time is not None and (now - self._last_seen_time) >= self.unknown_timeout:
+            if (
+                self._last_seen_time is not None
+                and (now - self._last_seen_time) >= self.unknown_timeout
+            ):
                 self._candidate = None
                 self._candidate_since = None
                 self._candidate_frames = 0
@@ -48,9 +51,9 @@ class GestureSmoother:
             return self._stable
 
         best, count = counts.most_common(1)[0]
-        if count < self.min_votes:
-            return self._stable
-
+        # Track how long the window majority has held before checking votes, so
+        # the hold time counts from when the gesture first appeared rather than
+        # from the frame on which it reached min_votes.
         if best != self._candidate:
             self._candidate = best
             self._candidate_since = now
@@ -58,12 +61,17 @@ class GestureSmoother:
         else:
             self._candidate_frames += 1
 
+        if count < self.min_votes:
+            return self._stable
+
         hold_time = self.min_stable_time
         if self._stable and self._stable != best:
             hold_time *= self.switch_multiplier
 
         if self._candidate_since is not None:
-            if (now - self._candidate_since) >= hold_time and self._candidate_frames >= self.min_frames:
+            if (
+                now - self._candidate_since
+            ) >= hold_time and self._candidate_frames >= self.min_frames:
                 self._stable = best
 
         return self._stable

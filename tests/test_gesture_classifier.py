@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 from hand_gesture_control.gesture_classifier import (
-    FOUR_FINGERS,
     FIST,
+    FOUR_FINGERS,
     INDEX_UP,
     OK_SIGN,
     OPEN_PALM,
