@@ -51,15 +51,18 @@ class GestureSmoother:
             return self._stable
 
         best, count = counts.most_common(1)[0]
-        if count < self.min_votes:
-            return self._stable
-
+        # Track how long the window majority has held before checking votes, so
+        # the hold time counts from when the gesture first appeared rather than
+        # from the frame on which it reached min_votes.
         if best != self._candidate:
             self._candidate = best
             self._candidate_since = now
             self._candidate_frames = 1
         else:
             self._candidate_frames += 1
+
+        if count < self.min_votes:
+            return self._stable
 
         hold_time = self.min_stable_time
         if self._stable and self._stable != best:
