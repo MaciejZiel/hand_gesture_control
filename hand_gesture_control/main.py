@@ -457,10 +457,6 @@ def _run_calibration(
         tracker.close()
         cap.release()
         cv2.destroyAllWindows()
-        if log_file:
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp} [INFO] Session ended\n")
-            log_file.close()
 
     thumb_ratio = results.get("OPEN PALM (thumb out)")
     pinch_ratio = results.get("PINCH (thumb + index)")
@@ -957,6 +953,10 @@ def main() -> int:
         tracker.close()
         cap.release()
         cv2.destroyAllWindows()
+        if log_file:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp} [INFO] Session ended\n")
+            log_file.close()
 
     if last_action:
         print(f"[INFO] Last action triggered: {last_action}")
