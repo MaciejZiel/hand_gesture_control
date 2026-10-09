@@ -1,5 +1,5 @@
 import time
-from typing import Iterable, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
 from pynput.keyboard import Controller, Key
 

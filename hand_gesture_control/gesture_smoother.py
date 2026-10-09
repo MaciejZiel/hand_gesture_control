@@ -1,5 +1,5 @@
-from collections import Counter, deque
 import time
+from collections import Counter, deque
 from typing import Deque, Optional
 
 
@@ -34,7 +34,10 @@ class GestureSmoother:
 
         self.window.append(gesture)
         if gesture == "UNKNOWN":
-            if self._last_seen_time is not None and (now - self._last_seen_time) >= self.unknown_timeout:
+            if (
+                self._last_seen_time is not None
+                and (now - self._last_seen_time) >= self.unknown_timeout
+            ):
                 self._candidate = None
                 self._candidate_since = None
                 self._candidate_frames = 0
@@ -63,7 +66,9 @@ class GestureSmoother:
             hold_time *= self.switch_multiplier
 
         if self._candidate_since is not None:
-            if (now - self._candidate_since) >= hold_time and self._candidate_frames >= self.min_frames:
+            if (
+                now - self._candidate_since
+            ) >= hold_time and self._candidate_frames >= self.min_frames:
                 self._stable = best
 
         return self._stable

@@ -217,7 +217,9 @@ def _get_screen_size() -> tuple[int, int] | tuple[None, None]:
     return width, height
 
 
-def _auto_overlay_scale(frame_height: int, base_height: int = 720, base_scale: float = 0.7) -> float:
+def _auto_overlay_scale(
+    frame_height: int, base_height: int = 720, base_scale: float = 0.7
+) -> float:
     scale = (frame_height / base_height) * base_scale
     return max(0.6, min(1.4, scale))
 
@@ -314,7 +316,7 @@ def _draw_overlay_panel(
     cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
 
     cursor_y = y + padding + max_height
-    for (text, color) in items:
+    for text, color in items:
         cv2.putText(
             frame,
             text,
@@ -400,9 +402,9 @@ def _run_calibration(
                     display_frame = cv2.resize(
                         frame,
                         (int(display_width), int(display_height)),
-                        interpolation=cv2.INTER_LINEAR
-                        if display_width >= frame.shape[1]
-                        else cv2.INTER_AREA,
+                        interpolation=(
+                            cv2.INTER_LINEAR if display_width >= frame.shape[1] else cv2.INTER_AREA
+                        ),
                     )
                 if hand_landmarks_list:
                     tracker.draw_landmarks(display_frame, hand_landmarks_list)
@@ -677,7 +679,8 @@ def main() -> int:
     def _reload_runtime_config() -> None:
         nonlocal profiles, profile_names, active_profile, profile_index
         nonlocal cooldown_seconds, smoothers
-        nonlocal window_size, min_votes, min_stable_time, min_frames, switch_multiplier, unknown_timeout
+        nonlocal window_size, min_votes, min_stable_time, min_frames
+        nonlocal switch_multiplier, unknown_timeout
         nonlocal log_enabled, log_mode, log_path, log_file, log_active, log_actions
         try:
             new_config = load_config(str(config_path))
@@ -780,9 +783,9 @@ def main() -> int:
                     display_frame = cv2.resize(
                         frame,
                         (int(display_width), int(display_height)),
-                        interpolation=cv2.INTER_LINEAR
-                        if display_width >= frame.shape[1]
-                        else cv2.INTER_AREA,
+                        interpolation=(
+                            cv2.INTER_LINEAR if display_width >= frame.shape[1] else cv2.INTER_AREA
+                        ),
                     )
                 if hand_landmarks_list:
                     tracker.draw_landmarks(display_frame, hand_landmarks_list)
@@ -814,7 +817,11 @@ def main() -> int:
             elif len(hand_landmarks_list) == 1:
                 active_gesture = stable_gestures[0]
 
-            action = _resolve_action(active_gesture, profiles, active_profile) if active_gesture else None
+            action = (
+                _resolve_action(active_gesture, profiles, active_profile)
+                if active_gesture
+                else None
+            )
 
             time_since = now - last_trigger_time
             in_cooldown = time_since < cooldown_seconds
@@ -828,7 +835,10 @@ def main() -> int:
                 last_trigger_time = now
                 last_action = action
                 if log_actions:
-                    _log_event(f"[ACTION] gesture={active_gesture} action={action} profile={active_profile}")
+                    _log_event(
+                        f"[ACTION] gesture={active_gesture} action={action} "
+                        f"profile={active_profile}"
+                    )
 
             if ui_state["action"]:
                 action_label = ui_state["action"]
@@ -848,9 +858,13 @@ def main() -> int:
                 if action_label in {"FS", "WIN"}:
                     fullscreen = not fullscreen
                     if fullscreen:
-                        cv2.setWindowProperty(WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+                        cv2.setWindowProperty(
+                            WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN
+                        )
                     else:
-                        cv2.setWindowProperty(WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
+                        cv2.setWindowProperty(
+                            WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL
+                        )
                         if display_width and display_height:
                             cv2.resizeWindow(WINDOW_TITLE, int(display_width), int(display_height))
 
@@ -876,7 +890,10 @@ def main() -> int:
                 overlay_items = []
                 overlay_items.append((f"Profile: {active_profile}", colors["text"]))
                 overlay_items.append(
-                    (f"Status: {'PAUSED' if paused else 'LIVE'}", colors["warn"] if paused else colors["ok"])
+                    (
+                        f"Status: {'PAUSED' if paused else 'LIVE'}",
+                        colors["warn"] if paused else colors["ok"],
+                    )
                 )
                 hand1_present = len(hand_landmarks_list) >= 1
                 hand2_present = len(hand_landmarks_list) >= 2
@@ -892,9 +909,14 @@ def main() -> int:
                         (f"Right: {hand2_gesture} / {hand2_stable or '-'}", colors["gesture"])
                     )
                 overlay_items.append(
-                    (f"Active: {active_gesture or '-'}", colors["ok"] if active_gesture else colors["muted"])
+                    (
+                        f"Active: {active_gesture or '-'}",
+                        colors["ok"] if active_gesture else colors["muted"],
+                    )
                 )
-                action_color = colors["muted"] if paused else (colors["action"] if action else colors["muted"])
+                action_color = (
+                    colors["muted"] if paused else (colors["action"] if action else colors["muted"])
+                )
                 overlay_items.append((f"Action: {action or '-'}", action_color))
                 if args.dry_run:
                     overlay_items.append(("Mode: DRY-RUN", colors["warn"]))
@@ -929,7 +951,12 @@ def main() -> int:
                         margin=controls_margin,
                         gap=controls_gap,
                     )
-                    _draw_controls(display_frame, ui_state["controls"], alpha=controls_alpha, thickness=thickness)
+                    _draw_controls(
+                        display_frame,
+                        ui_state["controls"],
+                        alpha=controls_alpha,
+                        thickness=thickness,
+                    )
 
                 cv2.imshow(WINDOW_TITLE, display_frame)
                 key = cv2.waitKey(1) & 0xFF

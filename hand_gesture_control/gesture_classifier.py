@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 GESTURE_UNKNOWN = "UNKNOWN"
 OPEN_PALM = "OPEN_PALM"
