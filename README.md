@@ -259,6 +259,9 @@ UI buttons:
 
 - `PAUSE` / `RUN` - pause/resume
 - `CFG` - reload configuration
+- `PROF` - next profile (shown when more than one profile exists)
+- `FS` / `WIN` - toggle fullscreen
+- `X` - quit
 
 ### Logging
 
