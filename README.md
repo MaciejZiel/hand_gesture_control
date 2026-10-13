@@ -165,6 +165,8 @@ Most important fields:
 - `cooldown_seconds`: delay between triggers
 - `backend`: `auto` / `solutions` / `tasks`
 - `task_model_path`: path to `hand_landmarker.task` (for `tasks`)
+- `camera_index`, `mirror`: which camera to open and whether to mirror the preview
+- `min_detection_confidence`, `min_tracking_confidence`: MediaPipe confidence thresholds
 - `camera_width` / `camera_height`: force camera resolution
 - `max_num_hands`: 1 or 2 (default: 2)
 - `headless`: `true`/`false` (run without a window)
