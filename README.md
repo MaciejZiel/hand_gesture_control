@@ -18,9 +18,6 @@
 
 <p align="center">MediaPipe finds the hand, a rule-based classifier names the gesture, and the app presses the keys (or runs the macro) you mapped to it. Developed and used on Linux; key injection goes through pynput, so Windows should work too but is untested.</p>
 
-<!-- TODO: add a short demo GIF (docs/demo.gif) recorded with the webcam preview,
-     showing a gesture and the triggered action in the status panel. -->
-
 ## Features
 
 - Tracks up to two hands in the webcam feed and recognises 11 single-hand gestures
@@ -95,12 +92,13 @@ Keys in the preview window: `s` pause/resume, `r` reload `config.json`, `p` next
 
 ```bash
 pip install -r requirements-dev.txt
-pytest          # 12 tests
+pytest          # 27 tests
 ruff check . && black --check .
 ```
 
-The tests feed synthetic landmark sets to the classifier (one per gesture) and drive the
-smoother with explicit timestamps, so they run without a camera. CI runs lint and tests on
+The tests feed synthetic landmark sets to the classifier (one per gesture), drive the
+smoother with explicit timestamps, and check config loading and action parsing (with a stubbed
+keyboard), so they run without a camera or display. CI runs lint and tests on
 Python 3.10 and 3.12.
 
 ## Key technical decisions
@@ -127,7 +125,7 @@ Python 3.10 and 3.12.
   sideways hands are misclassified.
 - Key injection goes through pynput, which does not work under Wayland without XWayland and
   may need accessibility permissions on macOS (macOS is untested).
-- Only the classifier and smoother are covered by tests; the capture loop in `main.py` is large
+- The classifier, smoother, config loading and action parsing are covered by tests; the capture loop in `main.py` is large
   and would benefit from being split so action resolution and the two-hand combiner can be tested.
 - Possible next steps: system tray control, a learned classifier (e.g. k-NN on landmarks) for
   custom gestures, profile import/export.
