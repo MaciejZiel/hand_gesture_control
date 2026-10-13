@@ -70,7 +70,10 @@ Other modes:
 python -m hand_gesture_control                 # live, sends key presses
 python -m hand_gesture_control --headless      # no preview window
 python -m hand_gesture_control --paused        # start with actions paused
-python -m hand_gesture_control --profile spotify
+python -m hand_gesture_control --profile <name>   # a profile defined in config.json
+python -m hand_gesture_control --list-profiles
+python -m hand_gesture_control --camera 1 --no-mirror --fullscreen
+python -m hand_gesture_control --config path/to/config.json
 python -m hand_gesture_control --calibrate --backend tasks   # tune thumb/pinch thresholds
 ```
 
