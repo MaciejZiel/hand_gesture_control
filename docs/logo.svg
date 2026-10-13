@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="hand_gesture_control">
+  <rect width="64" height="64" rx="15" fill="#0b1020"/>
+  <g stroke="#22d3ee" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M22 32V16"/>
+    <path d="M30 32V11"/>
+    <path d="M38 32V14"/>
+    <path d="M46 34V22"/>
+    <path d="M22 36L14 28"/>
+  </g>
+  <rect x="18" y="30" width="32" height="24" rx="10" fill="#22d3ee"/>
+</svg>
