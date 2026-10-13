@@ -2,7 +2,8 @@
 
 Control your desktop with hand gestures from a regular webcam: MediaPipe finds the hand,
 a rule-based classifier names the gesture, and the app presses the keys (or runs the macro)
-you mapped to it. Works on Linux and Windows.
+you mapped to it. Developed and used on Linux; key injection goes through pynput, so Windows
+should work too but is untested.
 
 [![CI](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml/badge.svg)](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -19,7 +20,7 @@ you mapped to it. Works on Linux and Windows.
 - Combines both hands into `BOTH_*`, `DUAL_<LEFT>_<RIGHT>`, `LEFT_*` and `RIGHT_*` gestures,
   so two-handed combinations can have their own bindings.
 - Maps gestures to key presses, shortcuts (`CTRL+SHIFT+P`), media keys or macros
-  (`CTRL+L;TEXT:hello;ENTER`), grouped into switchable profiles (e.g. Spotify, presentation).
+  (`CTRL+L;TEXT:hello;ENTER`), grouped into switchable profiles (the shipped `config.json` only defines `default`; add your own).
 - Debounces noisy per-frame predictions (voting window + minimum hold time + hysteresis
   on switching + cooldown) so a gesture fires once, not 30 times per second.
 - Ships with a calibration mode, live overlay with on-screen buttons, `--dry-run`,
@@ -69,7 +70,10 @@ Other modes:
 python -m hand_gesture_control                 # live, sends key presses
 python -m hand_gesture_control --headless      # no preview window
 python -m hand_gesture_control --paused        # start with actions paused
-python -m hand_gesture_control --profile spotify
+python -m hand_gesture_control --profile <name>   # a profile defined in config.json
+python -m hand_gesture_control --list-profiles
+python -m hand_gesture_control --camera 1 --no-mirror --fullscreen
+python -m hand_gesture_control --config path/to/config.json
 python -m hand_gesture_control --calibrate --backend tasks   # tune thumb/pinch thresholds
 ```
 
@@ -161,6 +165,8 @@ Most important fields:
 - `cooldown_seconds`: delay between triggers
 - `backend`: `auto` / `solutions` / `tasks`
 - `task_model_path`: path to `hand_landmarker.task` (for `tasks`)
+- `camera_index`, `mirror`: which camera to open and whether to mirror the preview
+- `min_detection_confidence`, `min_tracking_confidence`: MediaPipe confidence thresholds
 - `camera_width` / `camera_height`: force camera resolution
 - `max_num_hands`: 1 or 2 (default: 2)
 - `headless`: `true`/`false` (run without a window)
@@ -221,7 +227,8 @@ Two-hand gestures:
 
 ### Profiles
 
-You can define multiple profiles (for example Spotify/YouTube/Presentation).
+You can define multiple profiles (for example `spotify` or `presentation`). Only `default` is
+included in the repository.
 
 Example in `config.json`:
 
@@ -253,6 +260,9 @@ UI buttons:
 
 - `PAUSE` / `RUN` - pause/resume
 - `CFG` - reload configuration
+- `PROF` - next profile (shown when more than one profile exists)
+- `FS` / `WIN` - toggle fullscreen
+- `X` - quit
 
 ### Logging
 
