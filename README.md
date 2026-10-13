@@ -1,19 +1,27 @@
-# hand_gesture_control
+<p align="center">
+  <img src="docs/logo.svg" width="72" height="72" alt="hand_gesture_control logo">
+</p>
 
-Control your desktop with hand gestures from a regular webcam: MediaPipe finds the hand,
-a rule-based classifier names the gesture, and the app presses the keys (or runs the macro)
-you mapped to it. Developed and used on Linux; key injection goes through pynput, so Windows
-should work too but is untested.
+<h1 align="center">hand_gesture_control</h1>
 
-[![CI](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml/badge.svg)](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![MediaPipe + OpenCV](https://img.shields.io/badge/MediaPipe-OpenCV-0F9D58)
+<p align="center">
+  <b>Control your desktop with hand gestures from a regular webcam.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="Licence: MIT" src="https://img.shields.io/badge/licence-MIT-blue"></a>
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white">
+  <img alt="MediaPipe" src="https://img.shields.io/badge/MediaPipe-0F9D58">
+  <img alt="OpenCV" src="https://img.shields.io/badge/OpenCV-5C3EE8?logo=opencv&logoColor=white">
+</p>
+
+<p align="center">MediaPipe finds the hand, a rule-based classifier names the gesture, and the app presses the keys (or runs the macro) you mapped to it. Developed and used on Linux; key injection goes through pynput, so Windows should work too but is untested.</p>
 
 <!-- TODO: add a short demo GIF (docs/demo.gif) recorded with the webcam preview,
      showing a gesture and the triggered action in the status panel. -->
 
-## What it does
+## ✨ Features
 
 - Tracks up to two hands in the webcam feed and recognises 11 single-hand gestures
   (open palm, fist, pinch, OK sign, thumb up/down, 1-4 fingers, "rock") from 21 hand landmarks.
@@ -26,7 +34,7 @@ should work too but is untested.
 - Ships with a calibration mode, live overlay with on-screen buttons, `--dry-run`,
   headless mode, hot config reload, event logging and a Linux autostart script.
 
-## Architecture
+## 🧭 Architecture
 
 ```mermaid
 flowchart LR
@@ -42,12 +50,15 @@ flowchart LR
 `main.py` owns the capture loop and UI; the classifier and smoother are pure Python with no
 camera or MediaPipe dependency, which is what the tests exercise.
 
-## Tech stack
+## 🛠 Tech stack
 
-Python 3.10+, MediaPipe (Hands legacy API or Tasks `HandLandmarker`), OpenCV, pynput,
-pytest, ruff, black, GitHub Actions.
+| Layer | Used |
+|---|---|
+| Vision | MediaPipe (Hands legacy API or Tasks `HandLandmarker`), OpenCV |
+| Input | pynput |
+| Quality | pytest, ruff, black, GitHub Actions |
 
-## Quick start
+## 🚀 Quick start
 
 Requires a webcam.
 
@@ -80,7 +91,7 @@ python -m hand_gesture_control --calibrate --backend tasks   # tune thumb/pinch 
 Keys in the preview window: `s` pause/resume, `r` reload `config.json`, `p` next profile,
 `1`-`9` select profile.
 
-## Tests
+## 🧪 Tests
 
 ```bash
 pip install -r requirements-dev.txt
@@ -92,7 +103,7 @@ The tests feed synthetic landmark sets to the classifier (one per gesture) and d
 smoother with explicit timestamps, so they run without a camera. CI runs lint and tests on
 Python 3.10 and 3.12.
 
-## Key technical decisions
+## 🧱 Key technical decisions
 
 - **Rule-based classifier instead of a trained model.** Each finger is "extended" when
   tip, PIP and MCP joints are ordered along the y axis; the thumb and pinch use distances
@@ -110,7 +121,7 @@ Python 3.10 and 3.12.
 - **All behaviour in `config.json`.** Bindings, profiles, thresholds and UI settings are data,
   reloadable at runtime with `r`, so changing what a gesture does needs no code change.
 
-## Limitations / next steps
+## 🚧 Limitations / next steps
 
 - Gestures are judged from 2D image coordinates assuming an upright hand; strongly rotated or
   sideways hands are misclassified.
@@ -121,7 +132,7 @@ Python 3.10 and 3.12.
 - Possible next steps: system tray control, a learned classifier (e.g. k-NN on landmarks) for
   custom gestures, profile import/export.
 
-## Reference
+## 📖 Reference
 
 ### MediaPipe backend
 
@@ -281,6 +292,6 @@ bash scripts/install_autostart_linux.sh   # adds ~/.config/autostart/hand_gestur
 bash scripts/remove_autostart_linux.sh
 ```
 
-## License
+## 📄 Licence
 
 MIT, see [LICENSE](LICENSE).
