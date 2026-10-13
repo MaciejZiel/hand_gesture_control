@@ -20,7 +20,7 @@ should work too but is untested.
 - Combines both hands into `BOTH_*`, `DUAL_<LEFT>_<RIGHT>`, `LEFT_*` and `RIGHT_*` gestures,
   so two-handed combinations can have their own bindings.
 - Maps gestures to key presses, shortcuts (`CTRL+SHIFT+P`), media keys or macros
-  (`CTRL+L;TEXT:hello;ENTER`), grouped into switchable profiles (e.g. Spotify, presentation).
+  (`CTRL+L;TEXT:hello;ENTER`), grouped into switchable profiles (the shipped `config.json` only defines `default`; add your own).
 - Debounces noisy per-frame predictions (voting window + minimum hold time + hysteresis
   on switching + cooldown) so a gesture fires once, not 30 times per second.
 - Ships with a calibration mode, live overlay with on-screen buttons, `--dry-run`,
