@@ -2,7 +2,8 @@
 
 Control your desktop with hand gestures from a regular webcam: MediaPipe finds the hand,
 a rule-based classifier names the gesture, and the app presses the keys (or runs the macro)
-you mapped to it. Works on Linux and Windows.
+you mapped to it. Developed and used on Linux; key injection goes through pynput, so Windows
+should work too but is untested.
 
 [![CI](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml/badge.svg)](https://github.com/MaciejZiel/hand_gesture_control/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
