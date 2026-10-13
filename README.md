@@ -227,7 +227,8 @@ Two-hand gestures:
 
 ### Profiles
 
-You can define multiple profiles (for example Spotify/YouTube/Presentation).
+You can define multiple profiles (for example `spotify` or `presentation`). Only `default` is
+included in the repository.
 
 Example in `config.json`:
 
